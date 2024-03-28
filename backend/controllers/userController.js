@@ -1,50 +1,68 @@
 const Users = require("../model/userModel");
 const Courses = require("../model/courseModel");
+const jwt = require("jsonwebtoken");
 let validator = require("validator");
 const bcrypt = require("bcrypt");
+const asyncHandler = require("express-async-handler");
 const { default: mongoose } = require("mongoose");
 
-const loginUser = async (req, res) => {
+const loginUser = asyncHandler(async (req, res) => {
   let enteredEmail = req.body.email;
   let enteredPassword = req.body.password;
+  //check for user email
   const existing_User = await Users.findOne({ email: enteredEmail });
-  if (existing_User) {
-    if (bcrypt.compareSync(enteredPassword, existing_User.password)) {
-      console.log(`Login Success!!!!`);
-      res.send({ message: "Login Success", data: existing_User });
-      console.log(existing_User);
-    } else {
-      console.log("Wrong Password entered !!!");
-      res.status(401).send({ message: "Wrong Password Entered" });
-    }
+  if (
+    existing_User &&
+    bcrypt.compareSync(enteredPassword, existing_User.password)
+  ) {
+    res.status(201).json({
+      id: existing_User.id,
+      name: existing_User.name,
+      email: existing_User.email,
+      token: generateToken(existing_User.id),
+    });
   } else {
-    console.error("Please Signup user doesnt exist !!!");
-    res.status(401).send({ message: "Sign Up User doesnt exist" });
+    res.status(400);
+    throw new Error("Invalid Credentials");
   }
-};
+});
 
-const signUpUser = async (req, res) => {
+const signUpUser = asyncHandler(async (req, res) => {
   let userName = req.body.name;
   let userEmail = req.body.email;
   let userPassword = req.body.password;
-  console.log(req.body);
+  //check all fields
+  if (!userName || !userEmail || !userPassword) {
+    res.status(400);
+    throw new Error("Please add all fields");
+  }
+  //check if user exists
+  const existing_Users = await Users.findOne({ email: userEmail });
+  if (existing_Users) {
+    res.status(401);
+    throw new Error("User already exists");
+  }
+  // hash password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(userPassword, salt);
-  let userDetails = new Users({
+  // create user
+  const user = await Users.create({
     name: userName,
     email: userEmail,
     password: hashedPassword,
   });
-  const existing_Users = await Users.findOne({ email: userEmail });
-  if (existing_Users) {
-    console.log("Email already in use !!!");
-    res.status(401).send({ message: "signup failed user already exists" });
+  if (user) {
+    res.status(201).json({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      token: generateToken(user.id),
+    });
   } else {
-    userDetails.save();
-    console.log(`sign up successful!!!!!!`);
-    res.send({ message: "Sign Up Success" });
+    res.status(400);
+    throw new Error("Invalid user data");
   }
-};
+});
 
 const addToCart = async (req, res) => {
   const { id, course_id } = req.body;
@@ -73,14 +91,12 @@ const removeFromCart = async (req, res) => {
       return c._id.toString() !== course._id.toString();
     });
     await user.save();
-    console.log(course)
-    res
-      .status(200)
-      .send({
-        message: "Removed from cart",
-        data: course,
-        total: user.cartItems.length,
-      });
+    console.log(course);
+    res.status(200).send({
+      message: "Removed from cart",
+      data: course,
+      total: user.cartItems.length,
+    });
   } catch (error) {
     console.log(error.message);
     res.status(400).send({ message: "Error" });
@@ -89,13 +105,20 @@ const removeFromCart = async (req, res) => {
 
 const getCart = async (req, res) => {
   const { id } = req.params;
-  const user = await Users.findOne({ _id: id }).populate("cartItems");
+  const user = await Users.findOne({ _id: id });
   try {
-    res.status(200).send({ message: "Got cart items", data: user.cartItems });
+    res.status(200).send({ message: "Got cart items", data: user });
   } catch (error) {
     console.log(error);
     res.status(400).send({ message: "not found" });
   }
+};
+
+//generate token
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: "30d",
+  });
 };
 
 module.exports = {

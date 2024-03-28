@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -17,14 +16,13 @@ const userSchema = new mongoose.Schema({
   },
   cartItems: {
     type: Array,
-    default: []
+    default: [],
   },
   enrolledCourses: {
     type: Array,
     default: [],
   },
-  
 });
 
-const users=mongoose.model("users",userSchema)
-module.exports =users
+const users = mongoose.model("users", userSchema);
+module.exports = users;
