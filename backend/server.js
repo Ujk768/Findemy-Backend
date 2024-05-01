@@ -7,10 +7,12 @@ var bodyParser = require("body-parser");
 const { errorHandler } = require("./middleware/errorMiddleWare");
 const cors = require("cors");
 
+
 connectDb();
 const app = express();
 
 app.use(cors());
+app.use(express.static("public"));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -18,6 +20,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use("/courses", require("./routes/courseRoutes"));
 app.use("/users", require("./routes/userRoutes"));
+app.use("/stripe", require("./routes/stripeRoutes"));
 app.use(express.urlencoded({ extended: false }));
 app.use(errorHandler);
 app.listen(port, () => console.log(`Server running on port: ${port}`));

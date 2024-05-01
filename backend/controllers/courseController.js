@@ -13,7 +13,6 @@ const getCourseById = async (req, res) => {
 
 const getSearchedCourses = async (req, res, next) => {
   const queryString = req.query.query.toLowerCase();
-  console.log(req.query.query.toLowerCase());
   try {
     const searchCoursesData = await Courses.find({
       $text: { $search: queryString },

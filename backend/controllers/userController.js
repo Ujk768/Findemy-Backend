@@ -69,15 +69,14 @@ const addToCart = async (req, res) => {
   const user = await Users.findOne({ _id: id });
   const course = await Courses.findById(course_id);
   try {
-    if (user.cartItems.find((c) => c._id === course._id)) {
-      res.status(401).send({ message: "Already Added to cart" });
+    if (user.cartItems.find((c) => c._id.toString() === course._id.toString())) {
+            res.status(401).send({ message: "Already Added to cart" });
     } else {
       user.cartItems.push(course);
       await user.save();
       res.status(200).send({ message: "Added to cart", data: { course } });
     }
   } catch (error) {
-    console.log(error.message);
     res.status(400).send({ message: "Error" });
   }
 };
@@ -91,7 +90,6 @@ const removeFromCart = async (req, res) => {
       return c._id.toString() !== course._id.toString();
     });
     await user.save();
-    console.log(course);
     res.status(200).send({
       message: "Removed from cart",
       data: course,
@@ -104,10 +102,13 @@ const removeFromCart = async (req, res) => {
 };
 
 const getCart = async (req, res) => {
-  const { id } = req.params;
-  const user = await Users.findOne({ _id: id });
+  console.log("req",req.body);
+  const { id } = req.body;
+  
   try {
-    res.status(200).send({ message: "Got cart items", data: user });
+    const user = await Users.findOne({ _id: id });
+  console.log("user",id);
+    res.status(200).send({ message: "Got cart items", data: user?.cartItems });
   } catch (error) {
     console.log(error);
     res.status(400).send({ message: "not found" });
