@@ -61,8 +61,8 @@ const createCheckoutSession = async (req, res) => {
             allowed_countries: ["IN"],
           },
           payment_method_types: ["card"],
-          success_url: "http://localhost:3000/success",
-          cancel_url: "http://localhost:3000/",
+          success_url: `${process.env.FRONT_END_BASE_URL}/success`,
+          cancel_url: `${process.env.FRONT_END_BASE_URL}/`,
         });
         res.json({ id: session.id });
       } catch (err) {
