@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 // parse application/json
 app.use(bodyParser.json());
+app.use("/health", require("./routes/healthRoutes"));
 app.use("/courses", require("./routes/courseRoutes"));
 app.use("/users", require("./routes/userRoutes"));
 app.use("/stripe", require("./routes/stripeRoutes"));
