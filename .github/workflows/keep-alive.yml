@@ -11,6 +11,6 @@ jobs:
     steps:
       - name: Ping API
         run: |
-          echo "Pinging backend..."
-          curl -s https://findemy-backend-1.onrender.com/health
+          echo "Pinging Frontend to keep backend alive..."
+          curl -s https://findemy-wdn9.vercel.app/
           echo "Ping completed"
