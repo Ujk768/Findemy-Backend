@@ -12,5 +12,5 @@ jobs:
       - name: Ping API
         run: |
           echo "Pinging Frontend to keep backend alive..."
-          curl -s https://findemy-backend-1.onrender.com/courses/search?query=python
+          curl -s https://findemy-wdn9.vercel.app/search?query=python
           echo "Ping completed"
